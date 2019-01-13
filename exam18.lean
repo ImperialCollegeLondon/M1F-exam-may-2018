@@ -1,6 +1,7 @@
 import tactic.norm_num
 import tactic.linarith
 import tactic.ring
+import data.nat.basic
 import data.real.basic
 import data.set.basic
 import data.set.lattice
@@ -67,15 +68,30 @@ theorem exist_polycos (n : ℕ) (hn : n ≥ 1) : ∃ Pn : polynomial ℝ, ∀ θ
             complex.cos, complex.cos, complex.cos, complex.cos],
         simp,
         rw [mul_div_cancel', ←mul_div_assoc, ←neg_div, ←add_div, add_mul, mul_add, mul_add,
-            ←complex.exp_add, ←complex.exp_add, ←complex.exp_add, ←complex.exp_add],
-        
+            ←complex.exp_add, ←complex.exp_add, ←complex.exp_add, ←complex.exp_add,
+            mul_assoc, mul_assoc, mul_assoc],
+        rw [←one_mul (↑θ * complex.I)] {occs := occurrences.pos [5, 7]},
+        rw [←add_mul, ←sub_eq_add_neg, ←sub_mul, ←neg_one_mul (↑θ * complex.I),
+            ←add_mul, ←sub_eq_add_neg, ←sub_mul, @nat.cast_sub _ _ _ 1 k, add_sub, nat.cast_one, 
+            add_sub_cancel', ←sub_add, sub_add_eq_add_sub, one_add_one_eq_two, add_sub, 
+            ←sub_add_eq_add_sub, ←neg_add', one_add_one_eq_two, ←sub_add, sub_add_eq_add_sub, 
+            neg_add_self, zero_sub, nat.cast_sub, neg_mul_eq_neg_mul, neg_mul_eq_neg_mul, 
+            neg_sub, nat.cast_two, neg_add, sub_eq_neg_add, ←add_assoc, ←neg_add, 
+            ←sub_eq_neg_add, add_sub_add_right_eq_sub, ←add_assoc, sub_add_cancel],
+        all_goals { 
+            try {
+            have H : k ≥ 2,
+                apply le_of_not_gt, intro,
+                have h12 : k = 0 ∨ k = 1,
+                    clear ih ih1 ih2 h1 h2, try { clear hk },
+                    revert k a, exact dec_trivial,
+                apply or.elim h12 (λ h12, h1 h12) (λ h12, h2 h12) }, 
+                try { exact H }, try { exact le_trans (by norm_num : 1 ≤ 2) H } },
+        apply two_ne_zero',
+        apply @eq_of_add_eq_add_right _ _ _ 1 _,
+        rw [add_assoc, one_add_one_eq_two, nat.sub_add_cancel H, 
+            nat.sub_add_cancel (le_trans (by norm_num : 1 ≤ 2) H)]
     end
-
-example (k : ℕ) (θ : ℝ) 
-: (complex.exp (↑k * ↑θ * complex.I) + complex.exp (-(↑k * ↑θ * complex.I))) / 2 =
-    -((complex.exp (↑(k - 2) * ↑θ * complex.I) + complex.exp (-(↑(k - 2) * ↑θ * complex.I))) / 2) +
-      (complex.exp (↑θ * complex.I) + complex.exp (-(↑θ * complex.I))) *
-        ((complex.exp (↑(k - 1) * ↑θ * complex.I) + complex.exp (-(↑(k - 1) * ↑θ * complex.I))) / 2)
 
 --QUESTION 2
 ----part a
