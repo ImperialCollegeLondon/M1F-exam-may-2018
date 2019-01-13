@@ -1,11 +1,14 @@
 import tactic.norm_num
 import tactic.linarith
+import tactic.ring
 import data.real.basic
 import data.set.basic
 import data.set.lattice
 import data.complex.basic
 import data.complex.exponential
 import data.polynomial
+import analysis.polynomial
+import analysis.exponential
 
 universe u
 local attribute [instance, priority 0] classical.prop_decidable
@@ -17,36 +20,54 @@ theorem count (n : ℕ) (hn : n ≥ 1) : finset.sum (finset.range (nat.succ n)) 
         have H := (add_pow (1 : ℕ) 1 n).symm,
         simp [one_pow, one_mul, one_add_one_eq_two, 
             (finset.sum_nat_cast _ _).symm, nat.cast_id] at H,
-        simpa,
+        simpa
     end
 
 ------ii
 theorem countdown (n : ℕ) (hn : n ≥ 1) : finset.sum (finset.range (nat.succ n)) (λ m, (-1 : ℤ) ^ m * choose n m) = 0 := ---ans
     begin
         have H := (add_pow (-1 : ℤ) 1 n).symm,
-          simp [one_pow, one_mul, one_add_one_eq_two, zero_pow hn,
-              (finset.sum_nat_cast _ _).symm, nat.cast_id] at H,
-          simpa
+        simp [one_pow, one_mul, one_add_one_eq_two, zero_pow hn,
+            (finset.sum_nat_cast _ _).symm, nat.cast_id] at H,
+        simpa
     end
 
 ----part b
 ------i
 open real
 
+noncomputable def chebyshev : ℕ → polynomial ℝ
+| 0 := polynomial.C 1
+| 1 := polynomial.X
+| (n + 2) := 2 * polynomial.X * chebyshev (n + 1) - chebyshev n
+
 theorem exist_polycos (n : ℕ) (hn : n ≥ 1) : ∃ Pn : polynomial ℝ, ∀ θ : ℝ, cos (n * θ) = polynomial.eval (cos θ) Pn := ---ans
     begin
-        clear hn,
-        have hgen : (∃ Pn : polynomial ℝ, ∀ θ : ℝ, cos (↑n * θ) = polynomial.eval (cos θ) Pn) 
-                    ∧ (∃ Qn : polynomial ℝ, ∀ θ : ℝ, sin ↑n * θ = polynomial.eval (cos θ) Qn),
-        induction n with n ih,
-        { split, 
-            existsi polynomial.C (1 : ℝ), simp, 
-            existsi polynomial.C (0 : ℝ), simp },
-        { have Pn := classical.some ih.1, have Qn := classical.some ih.2,
-          sorry, -- this is wrong, I'll fix it
-        },
-        exact hgen.1
+        existsi chebyshev n, intro θ,
+        apply nat.strong_induction_on n,
+        intros k ih, 
+        have ih1 : cos (↑(k - 1) * θ) = polynomial.eval (cos θ) (chebyshev (k - 1)),
+            by_cases h : k = 0,
+              simp [h, chebyshev],
+          --by_cases h : k ≠ 0,
+              exact ih (k - 1) (nat.sub_lt (nat.pos_of_ne_zero h) (by norm_num : 0 < 1)),
+        have ih2 : cos (↑(k - 2) * θ) = polynomial.eval (cos θ) (chebyshev (k - 2)),
+            by_cases h : k = 0,
+              simp [h, chebyshev],
+            --by_cases h : k ≠ 0,
+              exact ih (k - 2) (nat.sub_lt (nat.pos_of_ne_zero h) (by norm_num : 0 < 2)),
+        by_cases h1 : k = 0, simp [h1, chebyshev],
+        by_cases h2 : k = 1, simp [h2, chebyshev],
+        have hk : k = (k - 2) + 2, rw nat.sub_add_cancel, swap,
+        rw [hk, chebyshev, ←hk, nat.succ_eq_add_one, (_ : k - 2 + 1 = k - 1), two_mul,
+            polynomial.eval_sub, polynomial.eval_mul, polynomial.eval_add,
+            polynomial.eval_X, ←two_mul, ←ih1, ←ih2], 
+        rw [←complex.of_real_inj, complex.of_real_sub, complex.of_real_mul, complex.of_real_mul,
+            complex.of_real_cos, complex.of_real_cos, complex.of_real_cos, complex.of_real_cos,
+            complex.cos, complex.cos, complex.cos, complex.cos],
+        simp,
     end
+#check complex.cos
 
 --QUESTION 2
 ----part a
