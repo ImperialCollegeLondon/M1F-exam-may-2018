@@ -42,6 +42,11 @@ noncomputable def chebyshev : ℕ → polynomial ℝ
 | 1 := polynomial.X
 | (n + 2) := 2 * polynomial.X * chebyshev (n + 1) - chebyshev n
 
+def chebyshev' : ℕ → polynomial ℤ
+| 0 := polynomial.C 1
+| 1 := polynomial.X
+| (n + 2) := 2 * polynomial.X * chebyshev' (n + 1) - chebyshev' n
+
 theorem exist_polycos (n : ℕ) (hn : n ≥ 1) : ∃ Pn : polynomial ℝ, ∀ θ : ℝ, cos (n * θ) = polynomial.eval (cos θ) Pn := ---ans
     begin
         existsi chebyshev n, intro θ,
@@ -93,6 +98,31 @@ theorem exist_polycos (n : ℕ) (hn : n ≥ 1) : ∃ Pn : polynomial ℝ, ∀ θ
             nat.sub_add_cancel (le_trans (by norm_num : 1 ≤ 2) H)]
     end
 
+------ii
+
+#eval (chebyshev' 4) ---ans
+                     ---C (8) * X ^ 4 + C (-8) * X ^ 2 + C (1)
+
+------iii
+
+theorem not_useful (n : ℕ) : polynomial.leading_coeff (chebyshev' n) = 2 ^ (n - 1) := ---ans
+begin
+    apply nat.strong_induction_on n, intros k hk,
+    have h1 : polynomial.leading_coeff (chebyshev' (k - 1)) = 2 ^ (k - 1 - 1),
+        by_cases h : k = 0,
+          simp [h, chebyshev'],
+          exact hk (k - 1) (nat.pred_lt h : k - 1 < k),
+    have h2 : polynomial.leading_coeff (chebyshev' (k - 2)) = 2 ^ (k - 2 - 1),
+        by_cases h : k ≤ 1,
+            apply or.elim ((dec_trivial : ∀ j : ℕ, j ≤ 1 → j = 0 ∨ j = 1) k h),
+                intro h0, simp [h0, chebyshev'], 
+                intro h1, simp [h1, chebyshev'],
+            exact hk (k - 2) (nat.sub_lt (lt_of_not_ge (λ w, h (le_trans w zero_le_one))) (by norm_num)),
+    by_cases h : k ≥ 2,
+        have H : k - 2 + 2 = k := nat.sub_add_cancel h,
+        rw [←H, chebyshev', H],
+end
+#check zero_le_one
 --QUESTION 2
 ----part a
 ------i
