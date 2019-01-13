@@ -66,8 +66,16 @@ theorem exist_polycos (n : ℕ) (hn : n ≥ 1) : ∃ Pn : polynomial ℝ, ∀ θ
             complex.of_real_cos, complex.of_real_cos, complex.of_real_cos, complex.of_real_cos,
             complex.cos, complex.cos, complex.cos, complex.cos],
         simp,
+        rw [mul_div_cancel', ←mul_div_assoc, ←neg_div, ←add_div, add_mul, mul_add, mul_add,
+            ←complex.exp_add, ←complex.exp_add, ←complex.exp_add, ←complex.exp_add],
+        
     end
-#check complex.cos
+
+example (k : ℕ) (θ : ℝ) 
+: (complex.exp (↑k * ↑θ * complex.I) + complex.exp (-(↑k * ↑θ * complex.I))) / 2 =
+    -((complex.exp (↑(k - 2) * ↑θ * complex.I) + complex.exp (-(↑(k - 2) * ↑θ * complex.I))) / 2) +
+      (complex.exp (↑θ * complex.I) + complex.exp (-(↑θ * complex.I))) *
+        ((complex.exp (↑(k - 1) * ↑θ * complex.I) + complex.exp (-(↑(k - 1) * ↑θ * complex.I))) / 2)
 
 --QUESTION 2
 ----part a
