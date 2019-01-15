@@ -100,10 +100,15 @@ theorem exist_polycos (n : ℕ) (hn : n ≥ 1) : ∃ Pn : polynomial ℝ, ∀ θ
 
 ------ii
 
-#eval (chebyshev' 4) ---ans
+#eval (chebyshev' 0) ---ans
                      ---C (8) * X ^ 4 + C (-8) * X ^ 2 + C (1)
 
 ------iii
+
+lemma useful (k : ℕ) : polynomial.degree (chebyshev' (k - 2)) < 1 + polynomial.degree (chebyshev' (k - 1)) :=
+begin
+
+end
 
 theorem not_useful (n : ℕ) : polynomial.leading_coeff (chebyshev' n) = 2 ^ (n - 1) := ---ans
 begin
@@ -120,9 +125,28 @@ begin
             exact hk (k - 2) (nat.sub_lt (lt_of_not_ge (λ w, h (le_trans w zero_le_one))) (by norm_num)),
     by_cases h : k ≥ 2,
         have H : k - 2 + 2 = k := nat.sub_add_cancel h,
-        rw [←H, chebyshev', H],
+        rw [←H, chebyshev', H, (_ : nat.succ (k - 2) = k - 1), sub_eq_add_neg, add_comm, 
+            polynomial.leading_coeff_add_of_degree_lt, polynomial.leading_coeff_mul,
+            polynomial.leading_coeff_mul, ←one_add_one_eq_two, 
+            polynomial.leading_coeff_add_of_degree_eq rfl, ←polynomial.C_1,
+            polynomial.leading_coeff_C, polynomial.leading_coeff_X, h1, 
+            one_add_one_eq_two, mul_one, ←pow_succ, nat.sub_add_cancel],
+    change 1 ≤ k - 1,
+    rwa [nat.le_sub_left_iff_add_le (le_of_lt h), one_add_one_eq_two],
+    rw [←polynomial.C_1, polynomial.leading_coeff_C, one_add_one_eq_two], exact two_ne_zero',
+    rw [polynomial.degree_neg, polynomial.degree_mul_eq, polynomial.degree_mul_eq,
+        ((one_add_one_eq_two).symm : ((2 : polynomial ℤ) = 1 + 1)), ←polynomial.C_1, ←polynomial.C_add, 
+        one_add_one_eq_two, polynomial.degree_C, zero_add, polynomial.degree_X],
+    exact useful k,
+    exact two_ne_zero',
+    rw [nat.succ_eq_add_one, eq_comm, ←nat.sub_eq_iff_eq_add, nat.sub_sub, one_add_one_eq_two],
+    rwa [nat.le_sub_left_iff_add_le (le_of_lt h), one_add_one_eq_two],
+    rw not_lt at h, 
+    have h' : k = 0 ∨ k = 1, clear hk h1 h2, revert k h, exact dec_trivial,
+    cases h',
+        all_goals { simp [h', chebyshev'] }
 end
-#check zero_le_one
+
 --QUESTION 2
 ----part a
 ------i
