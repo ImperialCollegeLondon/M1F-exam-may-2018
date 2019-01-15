@@ -100,14 +100,66 @@ theorem exist_polycos (n : ℕ) (hn : n ≥ 1) : ∃ Pn : polynomial ℝ, ∀ θ
 
 ------ii
 
-#eval (chebyshev' 0) ---ans
+#eval (chebyshev' 4) ---ans
                      ---C (8) * X ^ 4 + C (-8) * X ^ 2 + C (1)
 
 ------iii
 
-lemma useful (k : ℕ) : polynomial.degree (chebyshev' (k - 2)) < 1 + polynomial.degree (chebyshev' (k - 1)) :=
+lemma useful (k : ℕ) : polynomial.degree (chebyshev' k) = k :=
 begin
+    apply nat.strong_induction_on k,
+    intros n ih,
+    have ih1 : polynomial.degree (chebyshev' (n - 1)) = ↑(n - 1),
+        by_cases h : n = 0,
+            simp [h, chebyshev'], refl,
+            exact ih _ (nat.sub_lt (nat.pos_of_ne_zero h) (zero_lt_one)),
+    have ih2 : polynomial.degree (chebyshev' (n - 2)) = ↑(n - 2),
+        by_cases h : n ≤ 1,
+            apply or.elim ((dec_trivial : ∀ j : ℕ, j ≤ 1 → j = 0 ∨ j = 1) n h),
+                intro h0, simp [h0, chebyshev'], refl,
+                intro h1, simp [h1, chebyshev'], refl,
+            apply ih _, apply nat.sub_lt (lt_of_not_ge (λ w, h (le_trans w zero_le_one))), norm_num,
+    by_cases h : n ≥ 2,
+        have H : n - 2 + 2 = n := nat.sub_add_cancel h,
+        have H' : nat.succ (n - 2) = n - 1,
+            have W : n ≥ 2,
+                apply le_of_not_gt, intro,
+                have h12 : n = 0 ∨ n = 1,
+                    clear ih ih1 ih2 H h,
+                    revert n a, exact dec_trivial,
+                apply or.elim h12,
+                    intro h1, rw h1 at h, revert h, norm_num,
+                    intro h2, rw h2 at h, revert h, norm_num,
+        apply @eq_of_add_eq_add_right _ _ _ 1 _,
+        show n - 2 + 1 + 1 = n - 1 + 1,
+        rw [add_assoc, one_add_one_eq_two, nat.sub_add_cancel W, 
+            nat.sub_add_cancel (le_of_lt h)],
+        rw [←H, chebyshev', H, sub_eq_neg_add, polynomial.degree_add_eq_of_degree_lt,
+            polynomial.degree_mul_eq, polynomial.degree_mul_eq, polynomial.degree_X, H', ih1],
+        show (polynomial.degree (polynomial.C 2) + 1 + ↑(n - 1) = ↑n),
+        rw [polynomial.degree_C, zero_add, ←with_bot.coe_one, ←with_bot.coe_add,
+            add_comm, nat.sub_add_cancel (le_of_lt h)],
+        exact two_ne_zero',
+        rw [polynomial.degree_neg, polynomial.degree_mul_eq, polynomial.degree_mul_eq, ih2, H', ih1],
+        show (↑(n - 2) < polynomial.degree (polynomial.C 2) + polynomial.degree polynomial.X + ↑(n - 1)),
+        rw [polynomial.degree_C, polynomial.degree_X, zero_add, ←with_bot.coe_one, ←with_bot.coe_add,
+            add_comm, nat.sub_add_cancel (le_of_lt h), with_bot.coe_lt_coe],
+        apply nat.sub_lt (lt_trans zero_lt_one h), norm_num,
+        exact two_ne_zero',
+        apply or.elim ((dec_trivial : ∀ j : ℕ, j ≤ 1 → j = 0 ∨ j = 1) n (le_of_not_gt h)),
+            intro h0, simp [h0, chebyshev'], refl,
+            intro h1, simp [h1, chebyshev']
+end
 
+lemma useful' (k : ℕ) : polynomial.degree (chebyshev' (k - 2)) < 1 + polynomial.degree (chebyshev' (k - 1)) :=
+begin
+    rw [useful, useful, ←with_bot.coe_one, ←with_bot.coe_add, with_bot.coe_lt_coe, add_comm],
+    by_cases h : k ≤ 1,
+        apply or.elim ((dec_trivial : ∀ (j : ℕ), j ≤ 1 → j = 0 ∨ j = 1) k h),
+            intro h0, simp [h0], exact zero_lt_one,
+            intro h1, simp [h1], exact zero_lt_one,
+    rw [nat.sub_add_cancel (le_of_not_le h)],
+    apply nat.sub_lt (lt_of_lt_of_le zero_lt_one (le_of_not_le h)), norm_num
 end
 
 theorem not_useful (n : ℕ) : polynomial.leading_coeff (chebyshev' n) = 2 ^ (n - 1) := ---ans
@@ -137,7 +189,7 @@ begin
     rw [polynomial.degree_neg, polynomial.degree_mul_eq, polynomial.degree_mul_eq,
         ((one_add_one_eq_two).symm : ((2 : polynomial ℤ) = 1 + 1)), ←polynomial.C_1, ←polynomial.C_add, 
         one_add_one_eq_two, polynomial.degree_C, zero_add, polynomial.degree_X],
-    exact useful k,
+    exact useful' k,
     exact two_ne_zero',
     rw [nat.succ_eq_add_one, eq_comm, ←nat.sub_eq_iff_eq_add, nat.sub_sub, one_add_one_eq_two],
     rwa [nat.le_sub_left_iff_add_le (le_of_lt h), one_add_one_eq_two],
