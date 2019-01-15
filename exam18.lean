@@ -47,9 +47,9 @@ def chebyshev' : ℕ → polynomial ℤ
 | 1 := polynomial.X
 | (n + 2) := 2 * polynomial.X * chebyshev' (n + 1) - chebyshev' n
 
-theorem exist_polycos (n : ℕ) (hn : n ≥ 1) : ∃ Pn : polynomial ℝ, ∀ θ : ℝ, cos (n * θ) = polynomial.eval (cos θ) Pn := ---ans
+lemma polycos (n : ℕ) (hn : n ≥ 1) : ∀ θ : ℝ, cos (n * θ) = polynomial.eval (cos θ) (chebyshev n) :=
     begin
-        existsi chebyshev n, intro θ,
+        intro θ,
         apply nat.strong_induction_on n,
         intros k ih, 
         have ih1 : cos (↑(k - 1) * θ) = polynomial.eval (cos θ) (chebyshev (k - 1)),
@@ -97,6 +97,9 @@ theorem exist_polycos (n : ℕ) (hn : n ≥ 1) : ∃ Pn : polynomial ℝ, ∀ θ
         rw [add_assoc, one_add_one_eq_two, nat.sub_add_cancel H, 
             nat.sub_add_cancel (le_trans (by norm_num : 1 ≤ 2) H)]
     end
+
+theorem exist_polycos (n : ℕ) (hn : n ≥ 1) : ∃ Pn : polynomial ℝ, ∀ θ : ℝ, cos (n * θ) = polynomial.eval (cos θ) Pn := ---ans
+    Exists.intro (chebyshev n) (polycos n hn)
 
 ------ii
 
@@ -197,6 +200,14 @@ begin
     have h' : k = 0 ∨ k = 1, clear hk h1 h2, revert k h, exact dec_trivial,
     cases h',
         all_goals { simp [h', chebyshev'] }
+end
+
+------iv
+
+theorem cheby1 (n : ℕ) (hn : n ≥ 1) : polynomial.eval 1 (chebyshev n) = 1 := ---ans
+begin
+    have h := (polycos n hn 0).symm,
+    rwa [mul_zero, cos_zero] at h,
 end
 
 --QUESTION 2
