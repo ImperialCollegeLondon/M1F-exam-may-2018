@@ -103,8 +103,13 @@ theorem exist_polycos (n : ℕ) (hn : n ≥ 1) : ∃ Pn : polynomial ℝ, ∀ θ
 
 ------ii
 
-#eval (chebyshev' 4) ---ans
-                     ---C (8) * X ^ 4 + C (-8) * X ^ 2 + C (1)
+open polynomial
+
+example : chebyshev' 4 = 8 * X ^ 4 - 8 * X ^ 2 + 1 :=
+begin
+  unfold chebyshev',
+  ring
+end
 
 ------iii
 
