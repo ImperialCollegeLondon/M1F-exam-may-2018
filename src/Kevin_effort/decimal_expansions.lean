@@ -2,12 +2,12 @@ import analysis.real
 import algebra.archimedean
 import tactic.norm_num 
 
-variables {β : Type} [floor_ring β]
+variables {β : Type} [linear_ordered_ring β] [floor_ring β]
 
 namespace decimal 
 
 section 
-parameters {α : Type} [floor_ring α]
+parameters {α : Type} [linear_ordered_ring α] [floor_ring α]
 -- ⌊(real.sqrt 2 : ℝ)⌋
 
 definition chomp (r : α) : ℕ → α
@@ -64,11 +64,13 @@ theorem sQ : s = ((71/100:ℚ):ℝ) := by unfold s;norm_num
 theorem floor_s : floor s = 0 := 
 by rw [← floor_of_bounds, s, int.cast_zero]; norm_num
 
+--set_option pp.all true
 theorem floor_10s : floor (71/10 : ℝ) = 7 :=
 begin 
 rw [← floor_of_bounds],
 split,
-norm_num,
+  norm_num,
+  exact by norm_num, -- workaround for bug in mathlib
 end 
 
 lemma chomping_s : chomp s 2 = 0 :=
