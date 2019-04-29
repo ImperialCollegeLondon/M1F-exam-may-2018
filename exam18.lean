@@ -8,35 +8,43 @@ import data.set.lattice
 import data.complex.basic
 import data.complex.exponential
 import data.polynomial
-import analysis.polynomial
-import analysis.exponential
+--import analysis.polynomial
+--import analysis.exponential
+import data.nat.choose
 
 universe u
 local attribute [instance, priority 0] classical.prop_decidable
+
 --QUESTION 1
+
+section question_1
+
+open nat
+
 ----part a
+
 ------i
+
 theorem count (n : ℕ) (hn : n ≥ 1) : finset.sum (finset.range (nat.succ n)) (λ m, choose n m) = 2 ^ n := ---ans
     begin
         have H := (add_pow (1 : ℕ) 1 n).symm,
-        simp [one_pow, one_mul, one_add_one_eq_two, 
-            (finset.sum_nat_cast _ _).symm, nat.cast_id] at H,
-        simpa
+        simpa [nat.one_pow, one_mul, one_add_one_eq_two, 
+            (finset.sum_nat_cast _ _).symm, nat.cast_id] using H,
     end
 
 ------ii
 theorem countdown (n : ℕ) (hn : n ≥ 1) : finset.sum (finset.range (nat.succ n)) (λ m, (-1 : ℤ) ^ m * choose n m) = 0 := ---ans
     begin
         have H := (add_pow (-1 : ℤ) 1 n).symm,
-        simp [one_pow, one_mul, one_add_one_eq_two, zero_pow hn,
-            (finset.sum_nat_cast _ _).symm, nat.cast_id] at H,
-        simpa
+        have H2 := @_root_.zero_pow ℤ _ _ hn,
+        simpa [nat.one_pow, one_mul, one_add_one_eq_two, nat.zero_pow hn,
+            (finset.sum_nat_cast _ _).symm, nat.cast_id, H2] using H,
     end
 
 ----part b
 ------i
 open real
-
+#exit
 noncomputable def chebyshev : ℕ → polynomial ℝ
 | 0 := polynomial.C 1
 | 1 := polynomial.X
@@ -103,7 +111,6 @@ theorem exist_polycos (n : ℕ) (hn : n ≥ 1) : ∃ Pn : polynomial ℝ, ∀ θ
 
 ------ii
 
-<<<<<<< HEAD
 open polynomial
 
 example : chebyshev' 4 = 8 * X ^ 4 - 8 * X ^ 2 + 1 :=
@@ -111,10 +118,6 @@ begin
   unfold chebyshev',
   ring
 end
-=======
-theorem ringy : chebyshev' 4 = polynomial.C (8) * polynomial.X ^ 4 + polynomial.C (-8) * polynomial.X ^ 2 + polynomial.C (1) := ---ans
-by unfold chebyshev'; ring
->>>>>>> 5b8e5d78410cb77db0916223cf16412725a15622
 
 ------iii
 

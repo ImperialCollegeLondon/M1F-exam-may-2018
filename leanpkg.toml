@@ -1,8 +1,8 @@
 [package]
 name = "May 2018, M1F exam solutions in Lean"
 version = "0.1"
-lean_version = "nightly-2018-06-21"
+lean_version = "3.4.2"
 path = "src"
 
 [dependencies]
-mathlib = {git = "https://github.com/leanprover/mathlib", rev = "dcd0466de4add821402454281552eeaef0593843"}
+mathlib = {git = "https://github.com/leanprover/mathlib", rev = "0444f9c2154b1ceed244bbaae2ef1ecd78f903e5"}
