@@ -10,5 +10,5 @@ git clone git@github.com:ImperialCollegeLondon/M1F-exam-may-2018.git
 cd M1F-exam-may-2018
 leanpkg configure
 update-mathlib
-leanpkg make
+leanpkg build
 ```
