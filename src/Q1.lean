@@ -1,15 +1,7 @@
-import tactic.norm_num
 import tactic.linarith
-import tactic.ring
-import data.nat.basic
 import data.real.basic
-import data.set.basic
-import data.set.lattice
-import data.complex.basic
 import data.complex.exponential
 import data.polynomial
---import analysis.polynomial
---import analysis.exponential
 import data.nat.choose
 
 /-
@@ -24,7 +16,7 @@ local attribute [instance, priority 0] classical.prop_decidable
 
 open nat
 
-------(1)(a)(i)
+-- Q1(a)(i)
 theorem count (n : ℕ) (hn : n ≥ 1) : finset.sum (finset.range (nat.succ n)) (λ m, choose n m) =
   2 ^ n --answer
   :=
@@ -34,8 +26,9 @@ begin
     (finset.sum_nat_cast _ _).symm, nat.cast_id] using H,
 end
 
-------(1)(a)(ii)
-theorem countdown (n : ℕ) (hn : n ≥ 1) : finset.sum (finset.range (nat.succ n)) (λ m, (-1 : ℤ) ^ m * choose n m) =
+-- Q1(a)(ii)
+theorem countdown (n : ℕ) (hn : n ≥ 1) :
+  finset.sum (finset.range (nat.succ n)) (λ m, (-1 : ℤ) ^ m * choose n m) =
   0 -- answer
   := 
 begin
@@ -45,7 +38,7 @@ begin
     (finset.sum_nat_cast _ _).symm, nat.cast_id, H2] using H,
 end
 
-------(1)(b)(i)
+-- Q1(b) preparation
 open real polynomial
 noncomputable def chebyshev : ℕ → polynomial ℝ
 | 0 := C 1
@@ -118,16 +111,18 @@ begin
             nat.sub_add_cancel (le_trans (by norm_num : 1 ≤ 2) H)],
     end
 
-theorem exist_polycos (n : ℕ) (hn : n ≥ 1) : ∃ Pn : polynomial ℝ, ∀ θ : ℝ, cos (n * θ) = polynomial.eval (cos θ) Pn := ---ans
-    Exists.intro (chebyshev n) (polycos n hn)
-------ii
+-- Q1(b)(i)
+theorem exist_polycos (n : ℕ) (hn : n ≥ 1) :
+  ∃ Pn : polynomial ℝ, ∀ θ : ℝ, cos (n * θ) = polynomial.eval (cos θ) Pn := ---ans
+Exists.intro (chebyshev n) (polycos n hn)
+
 
 open polynomial
 
+-- Q1(b)(ii)
 example : chebyshev' 4 = 8 * X ^ 4 - 8 * X ^ 2 + 1 := dec_trivial
 
-------iii
-
+-- Q1(b)(iii) preparation
 lemma useful (k : ℕ) : polynomial.degree (chebyshev' k) = k :=
 begin
   apply nat.strong_induction_on k,
@@ -195,8 +190,9 @@ begin
     apply nat.sub_lt (lt_of_lt_of_le zero_lt_one (le_of_not_le h)), norm_num
 end
 
---set_option pp.all true
-theorem not_useful (n : ℕ) : polynomial.leading_coeff (chebyshev' n) = 2 ^ (n - 1) := ---ans
+-- Q1(b)(iii)
+theorem leading_coeff (n : ℕ) : polynomial.leading_coeff (chebyshev' n) =
+  2 ^ (n - 1) := ---ans
 begin
     apply nat.strong_induction_on n, intros k hk,
     have h1 : polynomial.leading_coeff (chebyshev' (k - 1)) = 2 ^ (k - 1 - 1),
@@ -234,8 +230,7 @@ begin
     { rw h', exact leading_coeff_C (1 : ℤ)}
 end
 
-------iv
-
+-- Q1(b)(iv)
 theorem cheby1 (n : ℕ) (hn : n ≥ 1) : polynomial.eval 1 (chebyshev n) = 1 := ---ans
 begin
     have h := (polycos n hn 0).symm,
