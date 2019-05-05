@@ -1,4 +1,4 @@
-import analysis.real
+import data.real.basic
 
 -- Johannes' is_lub is the "bound ∧ all other bounds bigger" definition.
 -- But Mario's real.exists_sup in the ℝ Lean files has conclusion

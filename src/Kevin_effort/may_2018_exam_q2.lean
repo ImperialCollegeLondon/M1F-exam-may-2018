@@ -1,7 +1,7 @@
-import analysis.real
+import data.real.basic
 import tactic.norm_num
-import xenalib.decimal_expansions
-import xenalib.mathlib_someday
+import Kevin_effort.decimal_expansions--.decimal_expansions
+import Kevin_effort.mathlib_someday
 import order.bounds 
 
 -- #check is_lub -- set α → α → Prop
