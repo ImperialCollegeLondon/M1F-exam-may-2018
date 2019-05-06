@@ -55,4 +55,3 @@ show 0 ≠ 8,
 by cc,
 end 
 
-end decimal
