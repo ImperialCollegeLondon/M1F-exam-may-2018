@@ -143,9 +143,11 @@ begin
 end
 
 -- now deduce it for an arbitrary set with two elements
-#check trunc
 variable [fintype S]
-theorem trans_of_refl (h : fintype.card S = 2) (r : S → S → Prop) (hr : reflexivity r) : transitivity r :=
+
+-- Q3(d)
+theorem trans_of_refl (h : fintype.card S = 2) (r : S → S → Prop)
+  (hr : reflexivity r) : transitivity r :=
 begin
   have Heq : S ≃ bool,
   { have h1 := trunc.out (fintype.equiv_fin S),
@@ -155,7 +157,22 @@ begin
     exact h1.trans h2.symm,
   },
   -- transport
-  sorry
+  let rb : bool → bool → Prop := λ b1 b2, r (Heq.symm b1) (Heq.symm b2),
+  have Hr : r = λ x y, rb (Heq x) (Heq y),
+  { ext x y,
+    congr'; simp
+  },
+  have hrb : reflexivity rb,
+  { 
+    intro s,
+    exact hr (Heq.symm s)
+  },
+  have htb : transitivity rb := trans_of_refl_aux rb hrb,
+  intros x y z hxy hyz,
+  rw Hr,
+  apply htb (Heq x) (Heq y) (Heq z),
+    convert hxy, rw Hr,
+    convert hyz, rw Hr,
 end
 
 
