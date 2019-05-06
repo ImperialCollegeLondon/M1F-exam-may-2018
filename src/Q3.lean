@@ -1,16 +1,5 @@
 import tactic.norm_num
-import tactic.linarith
-import tactic.ring
-import data.nat.basic
-import data.real.basic
-import data.set.basic
-import data.set.lattice
-import data.complex.basic
-import data.complex.exponential
-import data.polynomial
---import analysis.polynomial
---import analysis.exponential
-import data.nat.choose
+import data.fintype
 
 /-
 
