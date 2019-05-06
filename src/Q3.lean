@@ -12,30 +12,45 @@ import data.polynomial
 --import analysis.exponential
 import data.nat.choose
 
+/-
+
+M1F May exam 2018, question 3.
+
+Solutions by Abhimanyu Pallavi Sudhir,
+part (d) generalised to all types of size 2 by KMB
+
+-/
+
+
 universe u
 local attribute [instance, priority 0] classical.prop_decidable
 
-
 --QUESTION 3
+
 variable {S : Type u}
 
-----part a
-------i
-variable (binary_relation : S → S → Prop) ---ans
+-- Q3(a)(i)
+-- answer
+variable (binary_relation : S → S → Prop)
+
 local infix ` ~ `:1000 := binary_relation
 
-------ii
+-- Q3(a)(ii)
 def reflexivity := ∀ x, x ~ x
 def symmetry := ∀ (x y), x ~ y → y ~ x
 def transitivity := ∀ (x y z), x ~ y → y ~ z → x ~ z
-def is_equivalence := reflexivity binary_relation ∧ symmetry binary_relation ∧ transitivity binary_relation ---ans
+-- answer
+def is_equivalence := reflexivity binary_relation ∧ symmetry binary_relation ∧ transitivity binary_relation
 
-------iii
+-- Q3(a)(iii)
 variable {binary_relation}
-def cl (h : is_equivalence binary_relation) (a : S) : set S := { x | x ~ a } ---ans
+-- answer
+def cl (h : is_equivalence binary_relation) (a : S) : set S := { x | x ~ a }
 
-----part b
-theorem classes_injective2 (h : is_equivalence binary_relation) (a b : S) : (cl h a = cl h b) ∨ (cl h a ∩ cl h b) = ∅ := ---ans
+-- Q3(b)
+theorem classes_injective2 (h : is_equivalence binary_relation) (a b : S) :
+  (cl h a = cl h b) ∨ (cl h a ∩ cl h b) = ∅ :=
+-- answer
     begin
         /-duplicate h so we can continue using it as a parameter to cl, then unpack hDupe-/
         have hDupe : is_equivalence binary_relation := h,
@@ -75,15 +90,16 @@ theorem classes_injective2 (h : is_equivalence binary_relation) (a b : S) : (cl 
                 apply hT y b a, exact Hryb, exact Hrba,
     end
 
-----part c
+-- Q3(c)
 
 inductive double_cosets : ℤ → ℤ → Prop
     | cond1 : ∀ x, double_cosets x (x + 3)
     | cond2 : ∀ x, double_cosets x (x - 5)
-    | condT : ∀ x y z, double_cosets x y → double_cosets y z → double_cosets x z
+    | condT : ∀ x y z, double_cosets x y → double_cosets y z → double_cosets x z -- transitivity
 local infix ` ⋆ `:1001 := double_cosets
 
-theorem double_cosets_reflexive : reflexivity double_cosets := ---ans
+theorem double_cosets_reflexive : reflexivity double_cosets :=
+---answer
     begin
         rw reflexivity, intro x,
         /-get some trivial things out of the way-/
@@ -111,53 +127,36 @@ theorem double_cosets_reflexive : reflexivity double_cosets := ---ans
         rw H0 at Hxx, exact Hxx,
     end
 
-----part d
+-- Q3(d) preparation
 
-def S' : Type := fin 2
+-- first prove the result for `bool`, a concrete set with two elements
+theorem trans_of_refl_aux (r : bool → bool → Prop) (hr : reflexivity r) : transitivity r :=
+begin
+  rw transitivity,
+  intros x y z,
+  have Hxyyzzx : x = y ∨ y = z ∨ z = x,
+    cases x; cases y; cases z; simp,
+  rcases Hxyyzzx with rfl | rfl | rfl,
+  { intros h hxz, exact hxz},
+  { intros hxy h, exact hxy},
+  { intros h1 h2, exact hr z}
+end
 
-inductive self : fin 2 → fin 2 → Prop
-    | condR : ∀ x, self x x
-local infix ` ⋆ `:1 := self
+-- now deduce it for an arbitrary set with two elements
+#check trunc
+variable [fintype S]
+theorem trans_of_refl (h : fintype.card S = 2) (r : S → S → Prop) (hr : reflexivity r) : transitivity r :=
+begin
+  have Heq : S ≃ bool,
+  { have h1 := trunc.out (fintype.equiv_fin S),
+    rw h at h1,
+    have h2 := trunc.out (fintype.equiv_fin bool),
+    rw fintype.card_bool at h2,
+    exact h1.trans h2.symm,
+  },
+  -- transport
+  sorry
+end
 
-theorem self_transitive : transitivity self := ---ans
-    begin
-        rw transitivity,
-        intros x y z,
-        --rw S' at z y x,
-        have Hxyyzzx : x = y ∨ y = z ∨ z = x,
-            cases classical.em (x = y ∨ y = z ∨ z = x) with corr contr,
-            --case corr
-                exact corr,
-            --case contr
-                exfalso,
-                have contr_rw : ¬ (x = y) ∧ ¬ (y = z) ∧ ¬ (z = x),
-                    rw ←not_or_distrib, rw ←not_or_distrib, exact contr,
-                cases contr_rw with contr_xy contr_yzzx, cases contr_yzzx with contr_yz contr_zx,
-                have H01 : ∀ s : fin 2, s = 0 ∨ s = 1, exact dec_trivial,
-                have x01 : x = 0 ∨ x = 1, exact H01 x,
-                have y01 : y = 0 ∨ y = 1, exact H01 y,
-                have z01 : z = 0 ∨ z = 1, exact H01 z,
-                cases x01, cases y01, cases z01,
-                    rw ←y01 at x01, apply contr_xy, exact x01,
-                    rw ←y01 at x01, apply contr_xy, exact x01,
-                  cases z01,
-                    rw ←x01 at z01, apply contr_zx, exact z01,
-                    rw ←z01 at y01, apply contr_yz, exact y01,
-                  cases y01, cases z01,
-                    rw ←z01 at y01, apply contr_yz, exact y01,
-                    rw ←x01 at z01, apply contr_zx, exact z01,
-                  cases z01,
-                    rw ←y01 at x01, apply contr_xy, exact x01,
-                    rw ←y01 at x01, apply contr_xy, exact x01,
-        cases Hxyyzzx with Hxy Hyzzx,
-        --case Hxy
-            rw Hxy,
-            intro Hyy, intro Hyz, exact Hyz,
-          cases Hyzzx with Hyz Hxy,
-        --case Hyz
-            rw Hyz,
-            intro Hxz, intro Hzz, exact Hxz,
-        --case Hxy
-            rw Hxy,
-            intro Hxy, intro Hyx, exact self.condR x,
-    end
+
+
