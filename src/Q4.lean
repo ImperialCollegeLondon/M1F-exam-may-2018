@@ -1,16 +1,11 @@
 import tactic.norm_num
-import tactic.linarith
-import tactic.ring
-import data.nat.basic
-import data.real.basic
-import data.set.basic
-import data.set.lattice
-import data.complex.basic
-import data.complex.exponential
-import data.polynomial
---import analysis.polynomial
---import analysis.exponential
-import data.nat.choose
+/-
+
+M1F May exam 2018, question 4.
+
+Solutions by Abhimanyu Pallavi Sudhir,
+
+-/
 
 universe u
 local attribute [instance, priority 0] classical.prop_decidable
@@ -20,21 +15,21 @@ variable {X : Type u}
 variable {Y : Type u}
 variable {f : X → Y}
 
-----part a
-------i
-def injectivity (g : X → Y) := ∀ x1 x2 : X, g x1 = g x2 → x1 = x2 ---ans
+-- Q4(a)(i)
+def injectivity (g : X → Y) := ∀ x1 x2 : X, g x1 = g x2 → x1 = x2
 
-------ii
-def surjectivity (g : X → Y) := ∀ y : Y, ∃ x : X, g x = y ---ans
+-- Q4(a)(ii)
+def surjectivity (g : X → Y) := ∀ y : Y, ∃ x : X, g x = y
 
-------iii
-def bijectivity (g : X → Y) := injectivity g ∧ surjectivity g ---ans
+-- Q4(a)(iii)
+def bijectivity (g : X → Y) := injectivity g ∧ surjectivity g
 
-----part b
-------i
+-- Q4(b)(i) example
 def f1 : ℕ → ℕ
     | n := n + 2
-theorem injection : ∃ f : ℕ → ℕ, injectivity f ∧ ¬ surjectivity f := ---ans
+
+-- Q4(b)(i) proof
+theorem injection : ∃ f : ℕ → ℕ, injectivity f ∧ ¬ surjectivity f :=
     begin
         have injectionf1 : injectivity f1 ∧ ¬ surjectivity f1,
             split,
@@ -60,10 +55,11 @@ theorem injection : ∃ f : ℕ → ℕ, injectivity f ∧ ¬ surjectivity f := 
         fapply exists.intro, exact f1, exact injectionf1,
     end
 
-------ii
+-- Q4(b)(ii) example; note that 
 def f2 : ℕ → ℕ
     | n := n / 2
 
+-- Q4(b)(ii) proof
 theorem surjection : ∃ f : ℕ → ℕ, surjectivity f ∧ ¬ injectivity f := ---ans
     begin
         have surjectionf2 : surjectivity f2 ∧ ¬ injectivity f2,
@@ -88,7 +84,7 @@ theorem surjection : ∃ f : ℕ → ℕ, surjectivity f ∧ ¬ injectivity f :=
         fapply exists.intro, exact f2, exact surjectionf2,
     end
 
-------iii
+-- Q4(b)(iii) proof
 theorem bijections_are_injections : (∃ f : ℕ → ℕ, bijectivity f ∧ ¬ injectivity f) → false := ---ans
     begin
         intro Hf,
@@ -98,10 +94,7 @@ theorem bijections_are_injections : (∃ f : ℕ → ℕ, bijectivity f ∧ ¬ i
         apply Hfffi, exact Hffi,
     end
 
-------iv
-def setN : set ℕ := set.univ
-def powN := set.powerset setN
-
+-- Q4(b)(iv) proof
 theorem cantor : ¬ (∃ F : ℕ → set ℕ, bijectivity F) := ---ans
     begin
         intro HE_cantor,
@@ -123,7 +116,7 @@ theorem cantor : ¬ (∃ F : ℕ → set ℕ, bijectivity F) := ---ans
             apply HyxS, exact HxnS,
     end
 
-----part c
+-- Q4(c)
 def G (f : X → Y) : set (X × Y) := { g | g.2 = f (g.1) }
 def p1 (g : G f) : X := g.1.1
 
@@ -147,7 +140,7 @@ theorem bij_p1 : @bijectivity' (↥(G f)) X (p1) := ---ans
             existsi xy, refl,
     end
 
-----part d
+-- Q4(d)
 def p2 (g : G f) : Y := g.1.2
 
 theorem bij_p2_f : @bijectivity' (↥(G f)) Y (p2) → bijectivity' f := ---ans
