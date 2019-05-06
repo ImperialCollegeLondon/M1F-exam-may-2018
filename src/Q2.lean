@@ -1,32 +1,27 @@
-import tactic.norm_num
-import tactic.linarith
-import tactic.ring
-import data.nat.basic
 import data.real.basic
-import data.set.basic
-import data.set.lattice
-import data.complex.basic
-import data.complex.exponential
-import data.polynomial
---import analysis.polynomial
---import analysis.exponential
-import data.nat.choose
+
+import for_mathlib.decimal_expansions
+import zero_point_seven_one -- "obvious" proof that 0.71 has no 8's in decimal expansion!
+/-
+
+M1F May exam 2018, question 2.
+
+-/
 
 universe u
 local attribute [instance, priority 0] classical.prop_decidable
 
---QUESTION 2
-----part a
-------i
+-- Q2(a)(i)
 def ub (S : set ℝ) (x : ℝ) := ∀ s ∈ S, s ≤ x ---ans
 
-------ii
+-- Q2(a)(ii)
+-- iba: is bounded above
 def iba (S : set ℝ) := ∃ x, ub S x ---ans
 
-------iii
-def lub (S : set ℝ) (x : ℝ) := ub S x ∧ ∀ y : ℝ, (ub S y → x ≤ y) ---ans
+-- Q2(a)(iii)
+def lub (S : set ℝ) (b : ℝ) := ub S b ∧ ∀ y : ℝ, (ub S y → b ≤ y) ---ans
 
-----part b
+-- Q2(b)
 theorem lub_duh (S : set ℝ) : (∃ x, lub S x) → S ≠ ∅ ∧ iba S := ---ans
     begin
         intro Hexlub, cases Hexlub with x Hlub,
@@ -40,52 +35,75 @@ theorem lub_duh (S : set ℝ) : (∃ x, lub S x) → S ≠ ∅ ∧ iba S := ---a
                 intro y, apply Hl, apply Hallub,
             have Hcontr := Hneginf (x - 1),
             revert Hcontr, norm_num,
-      --split,
             existsi x, exact Hlub.left,
     end
 
-----part c
-------i
+-- Q2(c)(i) preparation
 def S1 := {x : ℝ | x < 59}
 
 lemma between_bounds (x y : ℝ) (H : x < y) : x < (x + y) / 2 ∧ (x + y) / 2 < y := 
 ⟨by linarith, by linarith⟩
 
-theorem S1_lub : ∃ x, lub S1 x := ---ans
+-- Q2(c)(i)
+theorem S1_lub : lub S1 59 := ---ans
     begin
-        existsi (59 : ℝ),
         split,
             intro, change (s < 59 → s ≤ 59), exact le_of_lt,
-      --split,
-            intro y, change ((∀ (s : ℝ), s < 59 → s ≤ y) → 59 ≤ y), intro Hbub,
-            apply le_of_not_gt, intro Hbadub,
-            have Houtofbounds := between_bounds y 59 Hbadub,
-            apply not_le_of_gt Houtofbounds.1 (Hbub ((y + 59) / 2) Houtofbounds.2),
+        intro y, change ((∀ (s : ℝ), s < 59 → s ≤ y) → 59 ≤ y), intro Hbub,
+        apply le_of_not_gt, intro Hbadub,
+        have Houtofbounds := between_bounds y 59 Hbadub,
+        apply not_le_of_gt Houtofbounds.1 (Hbub ((y + 59) / 2) Houtofbounds.2),
     end
 
-------ii
+-- Q2(c)(ii) preparations
 
-/------------------SORRY--------------------/
+definition S2 : set ℝ := {x | 7/10 < x ∧ x < 9/10 ∧ 
+  ∀ n : ℕ, decimal.expansion_nonneg x n ≠ 8}
 
-----part d
-------i
+lemma S2_nonempty_and_bounded : (∃ s : ℝ, s ∈ S2) ∧ ∀ (s : ℝ), s ∈ S2 → s ≤ 9/10 :=
+begin
+  split,
+  { -- 0.71 ∈ S
+    use (71 / 100 : ℝ),
+    split, norm_num, split, norm_num,
+    exact no_eights_in_0_point_71
+  },
+  rintro s ⟨hs1, hs2, h⟩,
+  exact le_of_lt hs2 
+end
+
+-- Q2(c)(ii)
+theorem S2_has_lub : ∃ b : ℝ, lub S2 b :=
+begin
+  cases S2_nonempty_and_bounded with Hne Hbd,
+  have H := real.exists_sup S2 Hne ⟨(9/10 : ℝ), Hbd⟩,
+  cases H with b Hb,
+  use b,
+  split,
+  { intros s2 Hs2,
+    exact (Hb b).mp (le_refl _) s2 Hs2, 
+  },
+  { intros y Hy,
+    exact (Hb y).mpr Hy,
+  }
+end 
+
+-- Q2(d)(i)
 theorem ublub_the_first (S : set ℝ) (b : ℝ) (hub : ub S b) (hin : b ∈ S) : lub S b := ---ans
     begin
         split,
             exact hub,
-      --split,
             intros y huby,
             exact huby b hin,
     end
 
-------ii
+-- Q2(d)(ii)
 theorem adlub_the_second (S T : set ℝ) (b c : ℝ) (hlubb : lub S b) (hlubc : lub T c) ---ans
 : lub ({x : ℝ | ∃ s t : ℝ, s ∈ S ∧ t ∈ T ∧ x = s + t}) (b + c) :=
     begin
         split,
             unfold ub, simp, intros x s hss t htt hxst, rw hxst,
             apply add_le_add (hlubb.1 s hss) (hlubc.1 t htt),
-      --split,
             unfold ub, simp, intros x Hx,
             apply le_of_not_gt, intro Hcontr,
             let ε := b + c - x, 
