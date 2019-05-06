@@ -156,7 +156,7 @@ begin
     rw fintype.card_bool at h2,
     exact h1.trans h2.symm,
   },
-  -- transport
+  -- transport needs to done manually, counterintuitive to mathematicians
   let rb : bool → bool → Prop := λ b1 b2, r (Heq.symm b1) (Heq.symm b2),
   have Hr : r = λ x y, rb (Heq x) (Heq y),
   { ext x y,
